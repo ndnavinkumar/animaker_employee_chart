@@ -1,0 +1,29 @@
+import { Employee } from "./types";
+
+// Simple in-memory mock data. In a real app this would come from a DB.
+export const employees: Employee[] = [
+  { id: "e1", name: "Alice Johnson", designation: "CEO", team: "Executive" },
+  { id: "e2", name: "Bob Smith", designation: "CTO", team: "Engineering", managerId: "e1" },
+  { id: "e3", name: "Carol Lee", designation: "CFO", team: "Finance", managerId: "e1" },
+  { id: "e4", name: "David Kim", designation: "Engineering Manager", team: "Engineering", managerId: "e2" },
+  { id: "e5", name: "Ella Brown", designation: "Lead Engineer", team: "Engineering", managerId: "e4" },
+  { id: "e6", name: "Frank Green", designation: "Software Engineer", team: "Engineering", managerId: "e5" },
+  { id: "e7", name: "Grace Miller", designation: "Software Engineer", team: "Engineering", managerId: "e5" },
+  { id: "e8", name: "Henry Wilson", designation: "Finance Manager", team: "Finance", managerId: "e3" },
+  { id: "e9", name: "Ivy Chen", designation: "Accountant", team: "Finance", managerId: "e8" },
+  { id: "e10", name: "Jack Davis", designation: "Accountant", team: "Finance", managerId: "e8" },
+  { id: "e11", name: "Karen Lopez", designation: "HR Manager", team: "People", managerId: "e1" },
+  { id: "e12", name: "Leo Martinez", designation: "Recruiter", team: "People", managerId: "e11" }
+];
+
+export function getAllEmployees(): Employee[] {
+  return employees;
+}
+
+export function setEmployeeManager(id: string, managerId?: string) {
+  const emp = employees.find(e => e.id === id);
+  if (!emp) return false;
+  if (managerId === id) return false;
+  emp.managerId = managerId || undefined;
+  return true;
+}
