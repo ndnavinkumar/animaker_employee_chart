@@ -23,3 +23,127 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom CSS for Employee Chart Components */
+
+/* Smooth scrollbar styling for employee list */
+.employee-list-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.employee-list-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.employee-list-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.employee-list-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Custom animation for tree node hover */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.tree-node-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tree-node-card:hover {
+  transform: translateY(-2px);
+}
+
+.tree-node-card.focused {
+  animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom gradient for employee avatars */
+.employee-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.employee-avatar.executive {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.employee-avatar.engineering {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.employee-avatar.finance {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.employee-avatar.people {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+/* Organization chart connecting lines */
+.org-line-vertical {
+  width: 2px;
+  background: linear-gradient(to bottom, #cbd5e0, #a0aec0);
+}
+
+.org-line-horizontal {
+  height: 2px;
+  background: linear-gradient(to right, #cbd5e0, #a0aec0);
+}
+
+/* Search highlight effect */
+mark.search-highlight {
+  background-color: rgba(251, 191, 36, 0.3);
+  color: inherit;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-weight: 500;
+  animation: highlight-fade-in 0.3s ease-in;
+}
+
+@keyframes highlight-fade-in {
+  from {
+    background-color: rgba(251, 191, 36, 0);
+  }
+  to {
+    background-color: rgba(251, 191, 36, 0.3);
+  }
+}
+
+/* Drag and drop visual feedback */
+.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.drop-target {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 0px, #e0e0e0 40px, #f0f0f0 80px);
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s infinite;
+}

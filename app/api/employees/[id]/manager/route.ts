@@ -16,7 +16,7 @@ export async function PUT(
       return NextResponse.json({ error: "Employee cannot manage themselves" }, { status: 400 });
     }
 
-    // Prevent cycles (walk up ancestors of manager to ensure not reaching id)
+    // Prevent cycles (walk up ancestors of manager)
     const parent: Record<string, string | undefined> = {};
     (getAllEmployees() as Employee[]).forEach((e: Employee) => { if (e.managerId) parent[e.id] = e.managerId; });
     let cur = managerId;

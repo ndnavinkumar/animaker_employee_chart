@@ -1,7 +1,8 @@
+// In-memory employee data store (persists across Fast Refresh via globalThis)
+
 import { Employee } from "./types";
 
-// Simple in-memory mock data. In a real app this would come from a DB.
-export const employees: Employee[] = [
+const initialEmployees: Employee[] = [
   { id: "e1", name: "Alice Johnson", designation: "CEO", team: "Executive" },
   { id: "e2", name: "Bob Smith", designation: "CTO", team: "Engineering", managerId: "e1" },
   { id: "e3", name: "Carol Lee", designation: "CFO", team: "Finance", managerId: "e1" },
@@ -16,14 +17,39 @@ export const employees: Employee[] = [
   { id: "e12", name: "Leo Martinez", designation: "Recruiter", team: "People", managerId: "e11" }
 ];
 
-export function getAllEmployees(): Employee[] {
-  return employees;
+// Initialize store once
+declare global {
+  var employeeStore: Employee[] | undefined;
 }
 
-export function setEmployeeManager(id: string, managerId?: string) {
-  const emp = employees.find(e => e.id === id);
+/**
+ * Initialize or retrieve the employee store from globalThis
+ * This pattern survives Next.js module hot reloading in development
+ */
+if (!globalThis.employeeStore) {
+  globalThis.employeeStore = initialEmployees.map(e => ({ ...e }));
+}
+
+export function getAllEmployees(): Employee[] {
+  return globalThis.employeeStore || [];
+}
+
+export function setEmployeeManager(id: string, managerId?: string): boolean {
+  if (!globalThis.employeeStore) return false;
+  
+  const emp = globalThis.employeeStore.find(e => e.id === id);
+  
   if (!emp) return false;
+  
+  // Prevent self-management
   if (managerId === id) return false;
+  
   emp.managerId = managerId || undefined;
+  
   return true;
 }
+
+export function resetEmployees(): void {
+  globalThis.employeeStore = initialEmployees.map(e => ({ ...e }));
+}
+

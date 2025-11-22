@@ -1,11 +1,7 @@
 export interface Employee {
-  id: string;
-  name: string;
-  designation: string;
-  team: string;
-  managerId?: string; // undefined / null means top-level
-}
-
-export interface EmployeeResponse {
-  employees: Employee[];
+  id: string;        // Unique identifier
+  name: string;      // Full name
+  designation: string; // Role/title
+  team: string;      // Team/department
+  managerId?: string; // Manager employee id (undefined for top-level)
 }

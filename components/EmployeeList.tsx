@@ -1,44 +1,53 @@
 "use client";
 import { useEmployees } from "../lib/useEmployees";
 import { Employee } from "../lib/types";
+import { groupEmployeesByTeam, findSearchMatch } from "../lib/searchHelpers";
 import { useState, useMemo, useCallback, useEffect } from "react";
-
+// Component props
 interface EmployeeListProps {
+  /** Callback when an employee is selected */
   onSelect?: (employee: Employee) => void;
+  /** ID of currently selected employee */
   selectedId?: string;
+  /** Callback when team filter changes */
   onTeamFilterChange?: (team: string) => void;
 }
 
+// Employee list with search/filter + keyboard nav
 export function EmployeeList({ onSelect, selectedId, onTeamFilterChange }: EmployeeListProps) {
+  // Get employee data and filter controls from custom hook
   const { employees, loading, error, search, setSearch, teamFilter, setTeamFilter, teams } = useEmployees();
-  const [expanded, setExpanded] = useState(true);
-  const [collapsedTeams, setCollapsedTeams] = useState<Record<string, boolean>>({});
-  const [focusIndex, setFocusIndex] = useState<number>(-1);
+  
+  // Component state
+  const [expanded, setExpanded] = useState(true); // Controls if search/filter panel is visible
+  const [collapsedTeams, setCollapsedTeams] = useState<Record<string, boolean>>({}); // Tracks which team sections are collapsed
+  const [focusIndex, setFocusIndex] = useState<number>(-1); // Current keyboard-focused employee index
 
   const total = employees.length;
 
-  // Group employees by team
+  // Group employees by team for organized display
   const teamsWithEmployees = useMemo(() => {
-    const map: Record<string, Employee[]> = {};
-    for (const e of employees) {
-      (map[e.team] ||= []).push(e);
-    }
-    return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
+    return groupEmployeesByTeam(employees);
   }, [employees]);
 
+  // Toggle team collapse
   const toggleTeam = useCallback((team: string) => {
     setCollapsedTeams(prev => ({ ...prev, [team]: !prev[team] }));
   }, []);
 
-  // Notify parent when team filter changes (including initial)
+  // Sync team filter with parent
   useEffect(() => {
     onTeamFilterChange?.(teamFilter);
   }, [teamFilter, onTeamFilterChange]);
 
-  const flatEmployees = useMemo(() => teamsWithEmployees.flatMap(g => g[1]), [teamsWithEmployees]);
+  // Flatten employees for keyboard nav
+  const flatEmployees = useMemo(() => teamsWithEmployees.flatMap((g: [string, Employee[]]) => g[1]), [teamsWithEmployees]);
 
+  // Keyboard navigation (arrows/home/end/enter)
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Don't handle keys while loading or in error state
     if (loading || error) return;
+    
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setFocusIndex(i => Math.min(flatEmployees.length - 1, i + 1));
@@ -59,18 +68,26 @@ export function EmployeeList({ onSelect, selectedId, onTeamFilterChange }: Emplo
   }, [flatEmployees, focusIndex, loading, error, onSelect]);
 
   const normalizedSearch = search.trim().toLowerCase();
+  
+  // Highlight search term in text
   const highlight = useCallback((text: string) => {
-    if (!normalizedSearch) return text;
-    const idx = text.toLowerCase().indexOf(normalizedSearch);
-    if (idx === -1) return text;
-    const before = text.slice(0, idx);
-    const match = text.slice(idx, idx + normalizedSearch.length);
-    const after = text.slice(idx + normalizedSearch.length);
-    return (<>{before}<mark className="bg-yellow-200/70 text-yellow-900 rounded-sm px-0.5">{match}</mark>{after}</>);
+    const match = findSearchMatch(text, normalizedSearch);
+    
+    if (!match) {
+      return text;
+    }
+    
+    return (
+      <>
+        {match.before}
+        <mark className="search-highlight">{match.match}</mark>
+        {match.after}
+      </>
+    );
   }, [normalizedSearch]);
 
   return (
-    <div className="flex flex-col h-full bg-white" onKeyDown={handleKeyDown} tabIndex={0} aria-label="Employee list" role="listbox">
+    <div className="flex flex-col h-full bg-white employee-list-container" onKeyDown={handleKeyDown} tabIndex={0} aria-label="Employee list" role="listbox">
       <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-gray-200 px-3 py-3 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-base text-gray-800 tracking-tight">Employees</h2>
@@ -116,7 +133,7 @@ export function EmployeeList({ onSelect, selectedId, onTeamFilterChange }: Emplo
           <p className="px-3 py-2 text-sm text-gray-500">No employees</p>
         )}
         <div>
-          {teamsWithEmployees.map(([team, list]) => {
+          {teamsWithEmployees.map(([team, list]: [string, Employee[]]) => {
             const collapsed = collapsedTeams[team];
             return (
               <div key={team} className="border-b border-gray-100">
@@ -134,7 +151,7 @@ export function EmployeeList({ onSelect, selectedId, onTeamFilterChange }: Emplo
                 </button>
                 {!collapsed && (
                   <ul className="divide-y divide-gray-100" role="group" aria-label={`${team} team`}>
-                    {list.map(emp => {
+                    {list.map((emp: Employee) => {
                       const idx = flatEmployees.indexOf(emp);
                       const focused = idx === focusIndex;
                       return (
